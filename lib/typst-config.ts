@@ -10,8 +10,8 @@ export const TYPST_CDN_CONFIG = {
     'https://cdn.jsdelivr.net/npm/@myriaddreamin/typst-ts-renderer/pkg/typst_ts_renderer_bg.wasm',
 } as const;
 
-// Initialize typst.ts with WASM module paths and preload fonts
-export function initializeTypst(): void {
+// Initialize typst.ts with WASM module paths, preload fonts, and register package registry
+export async function initializeTypst(): Promise<void> {
   if (typeof $typst === 'undefined') {
     console.warn('$typst not loaded yet');
     return;
@@ -25,12 +25,17 @@ export function initializeTypst(): void {
     getModule: () => TYPST_CDN_CONFIG.rendererWasmUrl,
   });
 
-  // Preload common fonts from CDN
+  // Preload fonts and register package registry
   if ($typst.TypstSnippet && $typst.use) {
     try {
+      // Preload common fonts from CDN
       $typst.use($typst.TypstSnippet.preloadFonts([...PRELOAD_FONTS]));
+
+      // Register package registry for @preview packages
+      const packageRegistry = await $typst.TypstSnippet.fetchPackageRegistry();
+      $typst.use(packageRegistry);
     } catch (err) {
-      console.warn('Failed to preload fonts:', err);
+      console.warn('Failed to initialize Typst:', err);
     }
   }
 }

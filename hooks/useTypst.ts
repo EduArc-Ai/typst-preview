@@ -92,9 +92,11 @@ export function useTypst(): UseTypstResult {
     if (existingScript) {
       // Script exists, check if $typst is available
       if (typeof $typst !== 'undefined') {
-        initializeTypst();
-        setIsReady(true);
-        scriptLoadedRef.current = true;
+        (async () => {
+          await initializeTypst();
+          setIsReady(true);
+          scriptLoadedRef.current = true;
+        })();
       }
       return;
     }
@@ -109,9 +111,11 @@ export function useTypst(): UseTypstResult {
       const checkTypst = setInterval(() => {
         if (typeof $typst !== 'undefined') {
           clearInterval(checkTypst);
-          initializeTypst();
-          setIsReady(true);
-          scriptLoadedRef.current = true;
+          (async () => {
+            await initializeTypst();
+            setIsReady(true);
+            scriptLoadedRef.current = true;
+          })();
         }
       }, 100);
 

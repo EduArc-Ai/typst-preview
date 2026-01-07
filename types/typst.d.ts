@@ -19,6 +19,7 @@ declare global {
     preloadFontFromUrl(fontUrl: string): TypstSnippetProvider;
     preloadFonts(fonts: (string | Uint8Array)[]): TypstSnippetProvider;
     withAccessModel(model: string): TypstSnippetProvider;
+    fetchPackageRegistry(): Promise<TypstSnippetProvider>;
   }
 
   interface Typst {

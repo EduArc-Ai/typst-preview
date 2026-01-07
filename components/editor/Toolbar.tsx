@@ -7,15 +7,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Download, FileText, Loader2, PanelLeftClose, PanelLeft } from 'lucide-react';
+import { Download, FileText, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ToolbarProps {
   onExportPdf: () => void;
   isExporting: boolean;
   isReady: boolean;
-  isEditorVisible: boolean;
-  onToggleEditor: () => void;
   className?: string;
 }
 
@@ -23,8 +21,6 @@ export function Toolbar({
   onExportPdf,
   isExporting,
   isReady,
-  isEditorVisible,
-  onToggleEditor,
   className,
 }: ToolbarProps) {
   return (
@@ -37,29 +33,10 @@ export function Toolbar({
       >
         <div className="flex items-center gap-2">
           <FileText className="h-5 w-5 text-primary" />
-          <span className="font-semibold text-lg">Typst Editor</span>
+          <span className="font-semibold text-lg">Typst Viewer</span>
         </div>
 
         <div className="flex items-center gap-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                onClick={onToggleEditor}
-                size="sm"
-                variant="ghost"
-              >
-                {isEditorVisible ? (
-                  <PanelLeftClose className="h-4 w-4" />
-                ) : (
-                  <PanelLeft className="h-4 w-4" />
-                )}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{isEditorVisible ? 'Hide editor' : 'Show editor'}</p>
-            </TooltipContent>
-          </Tooltip>
-
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
