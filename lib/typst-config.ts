@@ -1,22 +1,20 @@
 import { PRELOAD_FONTS } from './fonts';
+import { $typst, TypstSnippet } from '@myriaddreamin/typst.ts/dist/esm/contrib/snippet.mjs';
 
-// CDN URLs for typst.ts (following official documentation recommendations)
+// CDN URLs for WASM modules (still loaded from CDN for bundle size)
 export const TYPST_CDN_CONFIG = {
-  bundleUrl:
-    'https://cdn.jsdelivr.net/npm/@myriaddreamin/typst.ts/dist/esm/contrib/all-in-one-lite.bundle.js',
   compilerWasmUrl:
     'https://cdn.jsdelivr.net/npm/@myriaddreamin/typst-ts-web-compiler/pkg/typst_ts_web_compiler_bg.wasm',
   rendererWasmUrl:
     'https://cdn.jsdelivr.net/npm/@myriaddreamin/typst-ts-renderer/pkg/typst_ts_renderer_bg.wasm',
 } as const;
 
-// Initialize typst.ts with WASM module paths, preload fonts, and register package registry
-export async function initializeTypst(): Promise<void> {
-  if (typeof $typst === 'undefined') {
-    console.warn('$typst not loaded yet');
-    return;
-  }
+// Re-export $typst for use in other modules
+export { $typst, TypstSnippet };
 
+// Initialize typst.ts with WASM module paths, fonts, and package registry
+export async function initializeTypst(): Promise<void> {
+  // Set WASM module paths
   $typst.setCompilerInitOptions({
     getModule: () => TYPST_CDN_CONFIG.compilerWasmUrl,
   });
@@ -26,16 +24,15 @@ export async function initializeTypst(): Promise<void> {
   });
 
   // Preload fonts and register package registry
-  if ($typst.TypstSnippet && $typst.use) {
-    try {
-      // Preload common fonts from CDN
-      $typst.use($typst.TypstSnippet.preloadFonts([...PRELOAD_FONTS]));
+  try {
+    // Preload common fonts from CDN
+    $typst.use(TypstSnippet.preloadFonts([...PRELOAD_FONTS]));
 
-      // Register package registry for @preview packages
-      const packageRegistry = await $typst.TypstSnippet.fetchPackageRegistry();
-      $typst.use(packageRegistry);
-    } catch (err) {
-      console.warn('Failed to initialize Typst:', err);
-    }
+    // Register package registry for @preview packages
+    const packageRegistry = await TypstSnippet.fetchPackageRegistry();
+    $typst.use(packageRegistry);
+    console.log('Typst initialized with package registry');
+  } catch (err) {
+    console.warn('Failed to initialize Typst:', err);
   }
 }

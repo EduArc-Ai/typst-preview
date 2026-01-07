@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { $typst } from '@/lib/typst-config';
 
 interface UseTypstPdfResult {
   isExporting: boolean;
@@ -14,7 +15,7 @@ export function useTypstPdf(): UseTypstPdfResult {
 
   const exportPdf = useCallback(
     async (source: string, filename = 'document.pdf') => {
-      if (typeof $typst === 'undefined') {
+      if (!$typst) {
         setExportError('Typst compiler not ready');
         return;
       }
@@ -29,6 +30,11 @@ export function useTypstPdf(): UseTypstPdfResult {
 
       try {
         const pdfData = await $typst.pdf({ mainContent: source });
+
+        if (!pdfData) {
+          setExportError('PDF generation returned no data');
+          return;
+        }
 
         // Create blob and trigger download
         // Copy the data to a new ArrayBuffer for Blob compatibility
