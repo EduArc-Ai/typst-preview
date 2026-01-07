@@ -43,12 +43,13 @@ export function EditorLayout() {
         isReady={isReady}
       />
 
-      <div className="flex-1">
+      <div className="flex-1 min-h-0">
         <PreviewPanel
           svgContent={svgOutput}
           isCompiling={isCompiling}
           error={error}
           isReady={isReady}
+          className="h-full"
         />
       </div>
     </div>

@@ -1,9 +1,10 @@
 'use client';
 
-import { useRef, useState, useMemo } from 'react';
+import { useRef, useState, useMemo, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { ZoomIn, ZoomOut, AlertCircle, Copy, Check } from 'lucide-react';
 
 interface PreviewPanelProps {
@@ -17,6 +18,24 @@ interface PreviewPanelProps {
 const ZOOM_LEVELS = [50, 75, 100, 125, 150, 200];
 const DEFAULT_ZOOM = 150;
 const PAGE_GAP = 20; // Gap between pages in points
+
+// Extract width and height from SVG content
+function getSvgDimensions(svgContent: string): { width: number; height: number } | null {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(svgContent, 'image/svg+xml');
+  const svg = doc.querySelector('svg');
+
+  if (!svg) return null;
+
+  const width = parseFloat(svg.getAttribute('width') || '0');
+  const height = parseFloat(svg.getAttribute('height') || '0');
+
+  if (width && height) {
+    return { width, height };
+  }
+
+  return null;
+}
 
 // Process SVG to add page backgrounds and gaps
 function processSvgForPaging(svgContent: string): string {
@@ -130,8 +149,54 @@ export function PreviewPanel({
   className,
 }: PreviewPanelProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState(DEFAULT_ZOOM);
   const [copied, setCopied] = useState(false);
+
+  // Register global handleTypstLocation for internal document links
+  // Reference: https://github.com/Myriad-Dreamin/tinymist/pull/2287
+  useEffect(() => {
+    (window as unknown as { handleTypstLocation?: (elem: Element, pageNo: number, x: number, y: number) => void }).handleTypstLocation = (
+      _elem: Element,
+      pageNo: number,
+      _x: number,
+      y: number
+    ) => {
+      // Find the ScrollArea viewport element for programmatic scrolling
+      const scrollContainer = scrollContainerRef.current?.querySelector('[data-radix-scroll-area-viewport]') as HTMLElement | null;
+      if (!scrollContainer) return;
+
+      // Find target page in the SVG
+      const pages = containerRef.current?.querySelectorAll('.typst-page');
+      if (!pages || pageNo < 1 || pageNo > pages.length) return;
+
+      const targetPage = pages[pageNo - 1] as SVGElement;
+      if (!targetPage) return;
+
+      // Get the page's transform to find its Y position
+      const transform = targetPage.getAttribute('transform');
+      let pageY = 0;
+      if (transform) {
+        const match = transform.match(/translate\([\d.]+,\s*([\d.]+)\)/);
+        if (match) {
+          pageY = parseFloat(match[1]);
+        }
+      }
+
+      // Calculate scroll position including the y offset within the page
+      const currentZoom = zoom / 100;
+      const scrollTop = (pageY + y) * currentZoom;
+
+      scrollContainer.scrollTo({
+        top: scrollTop,
+        behavior: 'smooth'
+      });
+    };
+
+    return () => {
+      delete (window as unknown as { handleTypstLocation?: unknown }).handleTypstLocation;
+    };
+  }, [zoom]);
 
   const handleCopyError = async () => {
     if (error) {
@@ -150,6 +215,12 @@ export function PreviewPanel({
       return svgContent;
     }
   }, [svgContent]);
+
+  // Extract SVG dimensions for proper scroll container sizing
+  const svgDimensions = useMemo(() => {
+    if (!processedSvg) return null;
+    return getSvgDimensions(processedSvg);
+  }, [processedSvg]);
 
   const handleZoomIn = () => {
     const currentIndex = ZOOM_LEVELS.indexOf(zoom);
@@ -219,66 +290,73 @@ export function PreviewPanel({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 bg-neutral-200 dark:bg-neutral-800">
-        {!isReady ? (
-          <div className="space-y-4 p-4">
-            <Skeleton className="h-6 w-3/4" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-5/6" />
-            <Skeleton className="h-4 w-2/3" />
-            <div className="pt-4">
-              <Skeleton className="h-5 w-1/2" />
+      <ScrollArea ref={scrollContainerRef} className="flex-1 bg-neutral-100">
+        <div className="p-4 min-h-full w-full grid justify-items-center content-start">
+          {!isReady ? (
+            <div className="space-y-4 p-4">
+              <Skeleton className="h-6 w-3/4" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-5/6" />
+              <Skeleton className="h-4 w-2/3" />
+              <div className="pt-4">
+                <Skeleton className="h-5 w-1/2" />
+              </div>
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-4/5" />
             </div>
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-4/5" />
-          </div>
-        ) : error ? (
-          <div className="p-4 rounded-lg bg-red-50 dark:bg-red-950/50 border-2 border-red-200 dark:border-red-900 shadow-sm">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between gap-2 mb-2">
-                  <p className="text-sm font-semibold text-red-700 dark:text-red-300">
-                    Compilation Error
-                  </p>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleCopyError}
-                    className="h-7 px-2 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50"
-                  >
-                    {copied ? (
-                      <Check className="h-3.5 w-3.5" />
-                    ) : (
-                      <Copy className="h-3.5 w-3.5" />
-                    )}
-                    <span className="ml-1 text-xs">{copied ? 'Copied' : 'Copy'}</span>
-                  </Button>
+          ) : error ? (
+            <div className="p-4 rounded-lg bg-red-50 dark:bg-red-950/50 border-2 border-red-200 dark:border-red-900 shadow-sm">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <p className="text-sm font-semibold text-red-700 dark:text-red-300">
+                      Compilation Error
+                    </p>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleCopyError}
+                      className="h-7 px-2 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50"
+                    >
+                      {copied ? (
+                        <Check className="h-3.5 w-3.5" />
+                      ) : (
+                        <Copy className="h-3.5 w-3.5" />
+                      )}
+                      <span className="ml-1 text-xs">{copied ? 'Copied' : 'Copy'}</span>
+                    </Button>
+                  </div>
+                  <pre className="text-sm text-red-800 dark:text-red-200 font-mono whitespace-pre-wrap break-words leading-relaxed">
+                    {error}
+                  </pre>
                 </div>
-                <pre className="text-sm text-red-800 dark:text-red-200 font-mono whitespace-pre-wrap break-words leading-relaxed">
-                  {error}
-                </pre>
               </div>
             </div>
-          </div>
-        ) : processedSvg ? (
-          <div className="flex justify-center">
+          ) : processedSvg ? (
             <div
-              ref={containerRef}
-              className="typst-preview"
               style={{
-                transform: `scale(${zoom / 100})`,
-                transformOrigin: 'top center',
+                width: svgDimensions ? svgDimensions.width * (zoom / 100) : 'auto',
+                height: svgDimensions ? svgDimensions.height * (zoom / 100) : 'auto',
               }}
-              dangerouslySetInnerHTML={{ __html: processedSvg }}
-            />
-          </div>
-        ) : (
-          <div className="flex items-center justify-center h-full text-muted-foreground">
-            <p className="text-sm">Start typing to see the preview</p>
-          </div>
-        )}
-      </div>
+            >
+              <div
+                ref={containerRef}
+                className="typst-preview"
+                style={{
+                  transform: `scale(${zoom / 100})`,
+                  transformOrigin: 'top center',
+                }}
+                dangerouslySetInnerHTML={{ __html: processedSvg }}
+              />
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-full text-muted-foreground">
+              <p className="text-sm">Start typing to see the preview</p>
+            </div>
+          )}
+        </div>
+      </ScrollArea>
     </div>
   );
 }
