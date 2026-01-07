@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { initializeTypst, $typst } from '@/lib/typst-config';
+import { fetchTemplateFiles } from '@/lib/template-loader';
 
 interface UseTypstResult {
   isReady: boolean;
@@ -85,6 +86,26 @@ export function useTypst(): UseTypstResult {
     (async () => {
       try {
         await initializeTypst();
+
+        // Load and register template files and assets
+        const { files, assets } = await fetchTemplateFiles();
+
+        // Register .typ files for #import support
+        for (const [path, content] of files) {
+          await $typst.addSource(path, content);
+        }
+
+        // Register binary assets (images) for #image support
+        for (const [path, data] of assets) {
+          await $typst.mapShadow(path, data);
+        }
+
+        if (files.size > 0 || assets.size > 0) {
+          console.log(
+            `Registered ${files.size} template file(s) and ${assets.size} asset(s)`
+          );
+        }
+
         setIsReady(true);
       } catch (err) {
         setError(`Failed to initialize Typst: ${extractTypstError(err)}`);

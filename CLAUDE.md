@@ -6,11 +6,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Files to MODIFY:
 - **`public/template/main.typ`** - THE Typst document content (primary file to edit)
+- `public/template/README.md` - Template-specific AI instructions
 - `app/globals.css` - Theme colors (optional)
+
+### Reference Files (READ, don't modify):
+- **`SYNTAX.md`** - Comprehensive Typst syntax guide
+- **`public/template/demo.typ`** - Working examples of all Typst features
 
 ### Files to NEVER MODIFY (lock these in v0):
 - `hooks/` - Core compiler integration
 - `lib/` - Infrastructure (typst-config, fonts, utils, template-loader)
+- `app/api/` - API routes (template discovery)
 - `components/ui/` - Base UI components
 - `types/` - TypeScript declarations
 - `next.config.ts`, `tsconfig.json` - Build configuration
@@ -29,8 +35,30 @@ See: https://v0.app/docs/api/platform/guides/lock-files-from-ai-changes
 ### Template Structure
 ```
 public/template/
-├── main.typ          # THE file to modify - contains Typst document content
-└── assets/           # Place images and other assets here
+├── main.typ          # THE file to modify - your document content
+├── demo.typ          # Reference file - syntax examples (don't modify)
+├── README.md         # Template-specific AI instructions
+├── *.typ             # Additional template files (auto-loaded for #import)
+└── assets/           # Images (auto-loaded for #image)
+    └── *.png/jpg/svg # Supported: PNG, JPG, JPEG, GIF, SVG, WebP
+```
+
+### Syntax Reference
+See `SYNTAX.md` at project root for comprehensive Typst syntax documentation.
+See `public/template/demo.typ` for working examples of all features.
+
+### Local Template Imports
+Any `.typ` file in `public/template/` (except `main.typ`) is automatically registered and can be imported.
+**IMPORTANT**: Use absolute paths (starting with `/`) for imports:
+```typst
+#import "/my-template.typ": *
+#show: my-template.with(title: "My Doc")
+```
+
+### Local Images
+Images in `public/template/assets/` are auto-loaded. Use absolute paths:
+```typst
+#image("/assets/logo.png", width: 50%)
 ```
 
 ---
@@ -68,6 +96,10 @@ The Typst compiler runs entirely in the browser via WebAssembly:
 - [types/typst.d.ts](types/typst.d.ts) - TypeScript declarations for the global `$typst` object
 
 The global `$typst` object is injected by the CDN bundle and provides `svg()` and `pdf()` methods.
+
+Local template files are auto-discovered via:
+- [app/api/templates/route.ts](app/api/templates/route.ts) - API endpoint listing `.typ` files in `public/template/`
+- [lib/template-loader.ts](lib/template-loader.ts) - Fetches template files and registers them with `$typst.addSource()`
 
 ### Component Structure
 

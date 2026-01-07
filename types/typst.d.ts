@@ -29,6 +29,11 @@ declare global {
     setRendererInitOptions(options: TypstInitOptions): void;
     use(provider: TypstSnippetProvider): void;
     TypstSnippet: TypstSnippetStatic;
+    // Virtual filesystem methods for local imports
+    addSource(path: string, content: string): Promise<void>;
+    mapShadow(path: string, content: Uint8Array): Promise<void>;
+    unmapShadow(path: string): Promise<void>;
+    resetShadow(): Promise<void>;
   }
 
   const $typst: Typst;

@@ -338,6 +338,7 @@ export function PreviewPanel({
               style={{
                 width: svgDimensions ? svgDimensions.width * (zoom / 100) : 'auto',
                 height: svgDimensions ? svgDimensions.height * (zoom / 100) : 'auto',
+                overflow: 'hidden',
               }}
             >
               <div
