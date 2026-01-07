@@ -7,11 +7,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Files to MODIFY:
 - **`public/template/main.typ`** - THE Typst document content (primary file to edit)
 - `public/template/README.md` - Template-specific AI instructions
+- `components/editor/Toolbar.tsx` - App title (change "Typst Viewer" to your template name)
 - `app/globals.css` - Theme colors (optional)
 
+### Customizing App Title
+Edit `components/editor/Toolbar.tsx` line 36 to change the app title:
+```tsx
+<span className="font-semibold text-lg">Maths Worksheet Builder</span>
+```
+Examples: "Resume Builder", "Paper Editor", "Invoice Generator"
+
 ### Reference Files (READ, don't modify):
-- **`SYNTAX.md`** - Comprehensive Typst syntax guide
-- **`public/template/demo.typ`** - Working examples of all Typst features
+- **`SYNTAX.md`** - Comprehensive Typst syntax guide (shared across all templates)
+
+### Template-Specific Files to Customize:
+- **`public/template/demo.typ`** - Update with template-specific examples (e.g., math problems for worksheet, job entries for resume)
 
 ### Files to NEVER MODIFY (lock these in v0):
 - `hooks/` - Core compiler integration
@@ -35,12 +45,35 @@ See: https://v0.app/docs/api/platform/guides/lock-files-from-ai-changes
 ### Template Structure
 ```
 public/template/
-├── main.typ          # THE file to modify - your document content
-├── demo.typ          # Reference file - syntax examples (don't modify)
+├── <template>.typ    # Template logic (e.g., worksheet.typ, resume.typ)
+├── main.typ          # Content only - imports the template file
+├── demo.typ          # Examples - also imports the template file
 ├── README.md         # Template-specific AI instructions
-├── *.typ             # Additional template files (auto-loaded for #import)
 └── assets/           # Images (auto-loaded for #image)
     └── *.png/jpg/svg # Supported: PNG, JPG, JPEG, GIF, SVG, WebP
+```
+
+### Template Architecture (Important!)
+**DO NOT put template logic inline in main.typ or demo.typ.**
+
+Create a separate template file (e.g., `worksheet.typ`) with all styling/layout:
+```typst
+// worksheet.typ
+#let worksheet(title: "Worksheet", doc) = {
+  set page(paper: "a4")
+  set text(font: "Noto Sans")
+  align(center)[#text(size: 20pt)[#title]]
+  doc
+}
+```
+
+Then import it in main.typ and demo.typ:
+```typst
+// main.typ
+#import "/worksheet.typ": worksheet
+#show: worksheet.with(title: "My Worksheet")
+
+// Content here...
 ```
 
 ### Syntax Reference

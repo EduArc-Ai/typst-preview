@@ -71,20 +71,112 @@ your-template/
 
 | File | Purpose |
 |------|---------|
-| `SYNTAX.md` | Comprehensive Typst syntax reference |
+| `SYNTAX.md` | Comprehensive Typst syntax reference (shared) |
 | `public/template/main.typ` | Your document - **edit this** |
-| `public/template/demo.typ` | Working examples of all Typst features |
+| `public/template/demo.typ` | Template-specific examples - **customize this** |
 | `public/template/README.md` | Template-specific instructions for AI |
 
 ### What to Modify
 
 | File/Folder | Action | Purpose |
 |-------------|--------|---------|
-| `public/template/main.typ` | **EDIT** | Your main Typst document |
-| `public/template/*.typ` | **ADD** | Additional template files |
+| `public/template/main.typ` | **EDIT** | Your main Typst document (content only) |
+| `public/template/demo.typ` | **CUSTOMIZE** | Template-specific examples |
+| `public/template/<template>.typ` | **CREATE** | Template styling/logic (e.g., `worksheet.typ`) |
+| `public/template/README.md` | **UPDATE** | Template-specific AI instructions |
 | `public/template/assets/` | **ADD** | Images, logos, diagrams |
 | `CLAUDE.md` | **UPDATE** | AI instructions for your template |
+| `components/editor/Toolbar.tsx` | **UPDATE** | App title (see below) |
 | `app/globals.css` | Optional | Theme colors |
+
+### Template Architecture (Important!)
+
+**Always separate template logic from content.** Create a dedicated template file and import it:
+
+```
+public/template/
+├── worksheet.typ      ← Template logic (styling, layout, functions)
+├── main.typ           ← Content only (imports worksheet.typ)
+├── demo.typ           ← Examples (imports worksheet.typ)
+└── README.md
+```
+
+**worksheet.typ** - Template logic:
+```typst
+#let worksheet(title: "Worksheet", class: "Math", doc) = {
+  set page(paper: "a4", margin: 2cm)
+  set text(font: "Noto Sans", size: 11pt)
+
+  // Header
+  align(center)[#text(size: 20pt, weight: "bold")[#title]]
+
+  // Body
+  doc
+}
+```
+
+**main.typ** - Content only:
+```typst
+#import "/worksheet.typ": worksheet
+
+#show: worksheet.with(
+  title: "Algebra Practice",
+  class: "Grade 8",
+)
+
+= Problems
+
++ Solve: $2x + 5 = 13$
+```
+
+**demo.typ** - Also imports the template:
+```typst
+#import "/worksheet.typ": worksheet
+
+#show: worksheet.with(title: "Demo Worksheet")
+
+// Demo content showing all features...
+```
+
+**Why this matters:**
+- Template logic is reusable and maintainable
+- `main.typ` stays clean and focused on content
+- `demo.typ` uses the same styling as `main.typ`
+- AI can modify content without breaking template logic
+
+### Customizing the App Title
+
+The app title "Typst Viewer" appears in the top-left of the editor. To customize it for your template:
+
+**Edit `components/editor/Toolbar.tsx` line 36:**
+
+```tsx
+// Change from:
+<span className="font-semibold text-lg">Typst Viewer</span>
+
+// To your template name:
+<span className="font-semibold text-lg">Maths Worksheet Builder</span>
+```
+
+**Examples:**
+- Resume template → "Resume Builder"
+- Math worksheet → "Maths Worksheet Builder"
+- Academic paper → "Paper Editor"
+- Invoice template → "Invoice Generator"
+
+### Customizing demo.typ
+
+The `demo.typ` file should showcase features specific to your template type. Update it to include relevant examples:
+
+| Template Type | demo.typ Should Include |
+|---------------|------------------------|
+| Math Worksheet | Math equations, problem formats, answer spaces, grids |
+| Resume | Contact sections, experience entries, skills lists |
+| Academic Paper | Abstract, citations, figures, equations |
+| Invoice | Line items, totals, payment terms |
+| Letter | Sender/recipient blocks, formal layouts |
+
+The demo.typ serves as a reference for AI and users to understand what's possible with your specific template.
 
 ### What NOT to Modify
 
