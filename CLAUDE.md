@@ -19,7 +19,7 @@ Examples: "Resume Builder", "Paper Editor", "Invoice Generator"
 
 ### Reference Files (READ, don't modify):
 - **`SYNTAX.md`** - Comprehensive Typst syntax guide (shared across all templates)
-- **`instructions.md`** - Project-level AI instructions (Typst quick reference, fonts, architecture)
+- **`instructions.md`** - Concise AI instructions for template creation (<1000 chars)
 
 ### Template-Specific Files to Customize:
 - **`public/template/demo.typ`** - Update with template-specific examples (e.g., math problems for worksheet, job entries for resume)

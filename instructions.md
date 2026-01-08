@@ -1,100 +1,36 @@
-# Typst Editor
+# AI Instructions for Typst Template
 
-A web-based Typst document editor with live preview and PDF export.
+## Files
 
----
+- `public/template/main.typ` - EDIT THIS (content)
+- `public/template/<template>.typ` - DO NOT EDIT (template logic, if exists)
+- `public/template/demo.typ` - REFERENCE (examples)
+- `SYNTAX.md` - REFERENCE (syntax guide)
 
-## What to Edit
+## Quick Start
 
-### PRIMARY FILE
-**`public/template/main.typ`** - The Typst document. Edit this to change content.
+1. Edit `main.typ` only
+2. Use `= Heading` for sections
+3. Use `$ math $` for equations
+4. Use `#image("/assets/file.png")` for images
 
-### Supporting Files (in `public/template/`)
-- `*.typ` - Additional template files (auto-imported)
-- `assets/*` - Images (PNG, JPG, SVG, WebP)
+## Basic Syntax
 
----
+Text: `*bold*` `_italic_` `` `code` ``
+Lists: `- bullet` `+ numbered`
+Math: `$inline$` `$ block $`
 
-## What NOT to Edit
+## Template Pattern
 
-- `hooks/` - Compiler integration
-- `lib/` - Infrastructure
-- `components/` - Editor UI
-- `app/` - Next.js app
-- `types/` - TypeScript types
-- Config files (`*.config.*`, `tsconfig.json`)
-
----
-
-## Typst Syntax
-
-### Text
-```typst
-*bold*  _italic_  `code`
-```
-
-### Headings
-```typst
-= Level 1
-== Level 2
-=== Level 3
-```
-
-### Lists
-```typst
-- Bullet
-+ Numbered
-```
-
-### Math
-```typst
-$x^2$                // Inline
-$ x^2 + y^2 = z^2 $  // Block (spaces required)
-```
-
-### Images
-```typst
-#image("/assets/photo.png", width: 50%)
-```
-
-### Tables
-```typst
-#table(
-  columns: (auto, auto),
-  [*Header*], [*Header*],
-  [Cell], [Cell],
-)
-```
-
-### Page Setup
-```typst
-#set page(paper: "a4", margin: 2cm)
-#set text(font: "Noto Sans", size: 11pt)
-```
-
----
-
-## Available Fonts
-
-- `Noto Sans` / `Noto Serif` - Multilingual
-- `Linux Libertine` - Academic
-- `Fira Code` - Monospace
-- `Noto Sans SC` - Chinese
-
----
-
-## Import Local Files
-
+Create `<template>.typ` with logic, import in `main.typ`:
 ```typst
 #import "/template.typ": *
+#show: template.with(title: "Doc")
 ```
 
-All `.typ` files in `public/template/` are auto-registered.
+See `demo.typ` for examples. See `SYNTAX.md` for full syntax.
 
----
+## Do NOT
 
-## Resources
-
-- Full syntax: `SYNTAX.md`
-- Examples: `public/template/demo.typ`
-- Docs: https://typst.app/docs
+- Modify infrastructure (`hooks/`, `lib/`, `components/`)
+- Use relative imports (use `/file.typ` not `./file.typ`)
