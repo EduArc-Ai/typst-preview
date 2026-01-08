@@ -12,63 +12,46 @@ interface UseTypstResult {
   compile: (source: string) => Promise<void>;
 }
 
-// Extract detailed error information from typst.ts errors
+// Extract error message from unknown error types (fallback handler)
 function extractTypstError(err: unknown): string {
-  // Handle Error objects
   if (err instanceof Error) {
-    const message = err.message;
-
-    // Check for diagnostic array in the error
-    const errWithDiag = err as Error & { diagnostics?: unknown[] };
-    if (errWithDiag.diagnostics && Array.isArray(errWithDiag.diagnostics)) {
-      const diagnostics = errWithDiag.diagnostics
-        .map((d: unknown) => {
-          if (typeof d === 'object' && d !== null) {
-            const diag = d as { message?: string; severity?: string };
-            return diag.message || String(d);
-          }
-          return String(d);
-        })
-        .join('\n');
-      return diagnostics || message;
-    }
-
-    return message;
+    return err.message;
   }
-
-  // Handle string errors
   if (typeof err === 'string') {
     return err;
   }
-
-  // Handle object errors
   if (typeof err === 'object' && err !== null) {
     const errObj = err as Record<string, unknown>;
-
     if (typeof errObj.message === 'string') {
       return errObj.message;
     }
-
-    if (Array.isArray(errObj.diagnostics)) {
-      return errObj.diagnostics
-        .map((d: unknown) => {
-          if (typeof d === 'object' && d !== null) {
-            const diag = d as { message?: string };
-            return diag.message || JSON.stringify(d);
-          }
-          return String(d);
-        })
-        .join('\n');
-    }
-
     try {
       return JSON.stringify(err, null, 2);
     } catch {
       return String(err);
     }
   }
-
   return 'Compilation failed';
+}
+
+// Format unix-style diagnostics for display
+// Input: "/main.typ:15:8-15:20: error: cannot divide ratio by length"
+// Output: "Line 15, Col 8: cannot divide ratio by length"
+function formatDiagnostics(diagnostics: string[]): string {
+  return diagnostics
+    .map((diag) => {
+      // Parse unix format: "path:line:col-endLine:endCol: severity: message"
+      // or simpler: "path:line:col: severity: message"
+      const match = diag.match(/^([^:]+):(\d+):(\d+)(?:-\d+:\d+)?:\s*(\w+):\s*(.+)$/);
+      if (match) {
+        const [, , line, col, severity, message] = match;
+        const severityLabel = severity === 'error' ? 'Error' : severity === 'warning' ? 'Warning' : severity;
+        return `${severityLabel} at line ${line}, col ${col}: ${message}`;
+      }
+      // If format doesn't match, return as-is
+      return diag;
+    })
+    .join('\n');
 }
 
 export function useTypst(): UseTypstResult {
@@ -130,10 +113,35 @@ export function useTypst(): UseTypstResult {
       setError(null);
 
       try {
-        const svg = await $typst.svg({ mainContent: source });
-        setSvgOutput(svg);
-        setError(null);
+        // Get the compiler with diagnostics support
+        const compiler = await $typst.getCompiler();
+
+        // Add/update the main source in the virtual filesystem
+        await $typst.addSource('/main.typ', source);
+
+        // Compile with 'unix' diagnostics format for line:col information
+        const result = await compiler.compile({
+          mainFilePath: '/main.typ',
+          diagnostics: 'unix',
+        });
+
+        if (result.hasError && result.diagnostics?.length) {
+          // Format and display diagnostics
+          const errorMessage = formatDiagnostics(result.diagnostics);
+          setError(errorMessage);
+          setSvgOutput(null);
+        } else if (result.result) {
+          // Render the compiled vector data to SVG
+          const svg = await $typst.svg({ vectorData: result.result });
+          setSvgOutput(svg);
+          setError(null);
+        } else {
+          // No result and no error - shouldn't happen but handle gracefully
+          setError('Compilation produced no output');
+          setSvgOutput(null);
+        }
       } catch (err) {
+        // Fallback error handling for unexpected errors
         const errorMessage = extractTypstError(err);
         setError(errorMessage);
         setSvgOutput(null);

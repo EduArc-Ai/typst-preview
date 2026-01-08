@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Files to MODIFY:
 - **`public/template/main.typ`** - THE Typst document content (primary file to edit)
-- `public/template/README.md` - Template-specific AI instructions
+- **`public/template/README.md`** - Template-specific AI instructions
 - `components/editor/Toolbar.tsx` - App title (change "Typst Viewer" to your template name)
 - `app/globals.css` - Theme colors (optional)
 
@@ -19,6 +19,7 @@ Examples: "Resume Builder", "Paper Editor", "Invoice Generator"
 
 ### Reference Files (READ, don't modify):
 - **`SYNTAX.md`** - Comprehensive Typst syntax guide (shared across all templates)
+- **`instructions.md`** - Project-level AI instructions (Typst quick reference, fonts, architecture)
 
 ### Template-Specific Files to Customize:
 - **`public/template/demo.typ`** - Update with template-specific examples (e.g., math problems for worksheet, job entries for resume)
@@ -44,13 +45,18 @@ See: https://v0.app/docs/api/platform/guides/lock-files-from-ai-changes
 
 ### Template Structure
 ```
-public/template/
-├── <template>.typ    # Template logic (e.g., worksheet.typ, resume.typ)
-├── main.typ          # Content only - imports the template file
-├── demo.typ          # Examples - also imports the template file
-├── README.md         # Template-specific AI instructions
-└── assets/           # Images (auto-loaded for #image)
-    └── *.png/jpg/svg # Supported: PNG, JPG, JPEG, GIF, SVG, WebP
+project-root/
+├── instructions.md       # Project-level AI instructions
+├── SYNTAX.md             # Shared Typst syntax guide
+├── CLAUDE.md             # This file
+│
+└── public/template/
+    ├── README.md         # Template-specific AI instructions (customize this!)
+    ├── <template>.typ    # Template logic (e.g., worksheet.typ, resume.typ)
+    ├── main.typ          # Content only - imports the template file
+    ├── demo.typ          # Examples - also imports the template file
+    └── assets/           # Images (auto-loaded for #image)
+        └── *.png/jpg/svg # Supported: PNG, JPG, JPEG, GIF, SVG, WebP
 ```
 
 ### Template Architecture (Important!)

@@ -305,31 +305,31 @@ export function PreviewPanel({
               <Skeleton className="h-4 w-4/5" />
             </div>
           ) : error ? (
-            <div className="p-4 rounded-lg bg-red-50 dark:bg-red-950/50 border-2 border-red-200 dark:border-red-900 shadow-sm">
+            <div className="p-4 rounded-md bg-muted/50 border border-border max-w-lg">
               <div className="flex items-start gap-3">
-                <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                <AlertCircle className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2 mb-2">
-                    <p className="text-sm font-semibold text-red-700 dark:text-red-300">
-                      Compilation Error
+                  <pre className="text-sm text-foreground font-mono whitespace-pre-wrap break-words leading-relaxed">
+                    {error}
+                  </pre>
+                  <div className="mt-3 pt-3 border-t border-border flex items-center justify-between gap-2">
+                    <p className="text-xs text-muted-foreground">
+                      Copy and ask AI to fix it
                     </p>
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       size="sm"
                       onClick={handleCopyError}
-                      className="h-7 px-2 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50"
+                      className="h-7 px-2 text-xs"
                     >
                       {copied ? (
                         <Check className="h-3.5 w-3.5" />
                       ) : (
                         <Copy className="h-3.5 w-3.5" />
                       )}
-                      <span className="ml-1 text-xs">{copied ? 'Copied' : 'Copy'}</span>
+                      <span className="ml-1">{copied ? 'Copied!' : 'Copy'}</span>
                     </Button>
                   </div>
-                  <pre className="text-sm text-red-800 dark:text-red-200 font-mono whitespace-pre-wrap break-words leading-relaxed">
-                    {error}
-                  </pre>
                 </div>
               </div>
             </div>

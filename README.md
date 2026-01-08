@@ -50,12 +50,13 @@ your-template/
 ├── SYNTAX.md                 # Typst syntax guide (shared reference)
 ├── CLAUDE.md                 # AI instructions for the project
 ├── README.md                 # This file
+├── instructions.md           # Project-level AI instructions
 │
 ├── public/template/          # ← ONLY MODIFY THIS FOLDER
-│   ├── main.typ              # Your Typst document (edit this!)
-│   ├── demo.typ              # Feature demo & syntax examples (reference)
-│   ├── README.md             # Template-specific AI instructions
-│   ├── *.typ                 # Additional template files (optional)
+│   ├── README.md             # Template-specific AI instructions (customize this!)
+│   ├── <template>.typ        # Template logic (e.g., worksheet.typ)
+│   ├── main.typ              # Your Typst document (content only)
+│   ├── demo.typ              # Template-specific examples
 │   └── assets/               # Images and resources (optional)
 │       ├── logo.png
 │       └── diagram.svg
@@ -72,20 +73,21 @@ your-template/
 | File | Purpose |
 |------|---------|
 | `SYNTAX.md` | Comprehensive Typst syntax reference (shared) |
-| `public/template/main.typ` | Your document - **edit this** |
+| `instructions.md` | Project-level AI instructions (shared) |
+| `public/template/README.md` | Template-specific AI instructions - **customize this** |
+| `public/template/main.typ` | Your document content - **edit this** |
 | `public/template/demo.typ` | Template-specific examples - **customize this** |
-| `public/template/README.md` | Template-specific instructions for AI |
+| `public/template/<template>.typ` | Template logic (e.g., `worksheet.typ`) |
 
 ### What to Modify
 
 | File/Folder | Action | Purpose |
 |-------------|--------|---------|
+| `public/template/README.md` | **CUSTOMIZE** | Template-specific AI instructions |
 | `public/template/main.typ` | **EDIT** | Your main Typst document (content only) |
 | `public/template/demo.typ` | **CUSTOMIZE** | Template-specific examples |
 | `public/template/<template>.typ` | **CREATE** | Template styling/logic (e.g., `worksheet.typ`) |
-| `public/template/README.md` | **UPDATE** | Template-specific AI instructions |
 | `public/template/assets/` | **ADD** | Images, logos, diagrams |
-| `CLAUDE.md` | **UPDATE** | AI instructions for your template |
 | `components/editor/Toolbar.tsx` | **UPDATE** | App title (see below) |
 | `app/globals.css` | Optional | Theme colors |
 
@@ -177,6 +179,42 @@ The `demo.typ` file should showcase features specific to your template type. Upd
 | Letter | Sender/recipient blocks, formal layouts |
 
 The demo.typ serves as a reference for AI and users to understand what's possible with your specific template.
+
+### public/template/README.md (Template-Specific AI Instructions)
+
+The `public/template/README.md` file provides template-specific context for AI models. Customize it for each template type:
+
+```markdown
+# Math Worksheet Template
+
+## Overview
+This template creates printable math worksheets with problems and answer spaces.
+
+## Files
+| File | Purpose |
+|------|---------|
+| `main.typ` | Worksheet content (problems) |
+| `demo.typ` | Example showing all features |
+| `worksheet.typ` | Template logic (don't modify) |
+
+## Content Structure
+- Use `= Section` for topic headings
+- Use `+` for numbered problems
+- Use `$ ... $` for math equations
+- Use `#workspace(3cm)` for answer space
+
+## Available Functions
+- `#instructions[text]` - Add instruction box
+- `#workspace(height)` - Add blank answer space
+- `#points(n)` - Add point value to problem
+
+## Example Problem Format
+```typst
++ Solve for $x$:
+  $ 2x + 5 = 13 $
+  #workspace(3cm)
+```
+```
 
 ### What NOT to Modify
 

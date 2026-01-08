@@ -22,13 +22,42 @@ declare global {
     fetchPackageRegistry(): Promise<TypstSnippetProvider>;
   }
 
+  // Diagnostics format options for compile errors
+  type DiagnosticsFormat = 'none' | 'unix' | 'full';
+
+  // Options for compiler.compile()
+  interface TypstCompilerOptions {
+    mainFilePath: string;
+    mainContent?: string;
+    diagnostics?: DiagnosticsFormat;
+  }
+
+  // Result from compiler.compile()
+  interface TypstCompileResult {
+    result?: Uint8Array;  // Vector format artifact
+    diagnostics?: string[];  // Error messages (format depends on diagnostics option)
+    hasError: boolean;
+  }
+
+  // Lower-level compiler interface with diagnostics support
+  interface TypstCompiler {
+    compile(options: TypstCompilerOptions): Promise<TypstCompileResult>;
+  }
+
+  // Options for rendering pre-compiled vector data
+  interface TypstRenderOptions {
+    vectorData: Uint8Array;
+  }
+
   interface Typst {
-    svg(options: TypstCompileOptions): Promise<string>;
+    svg(options: TypstCompileOptions | TypstRenderOptions): Promise<string>;
     pdf(options: TypstCompileOptions): Promise<Uint8Array>;
     setCompilerInitOptions(options: TypstInitOptions): void;
     setRendererInitOptions(options: TypstInitOptions): void;
     use(provider: TypstSnippetProvider): void;
     TypstSnippet: TypstSnippetStatic;
+    // Get lower-level compiler with diagnostics support
+    getCompiler(): Promise<TypstCompiler>;
     // Virtual filesystem methods for local imports
     addSource(path: string, content: string): Promise<void>;
     mapShadow(path: string, content: Uint8Array): Promise<void>;

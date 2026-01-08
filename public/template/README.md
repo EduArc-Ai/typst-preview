@@ -1,6 +1,6 @@
 # Template: Basic Document
 
-This is the default Typst template - a general-purpose document suitable for various content types.
+A general-purpose Typst template suitable for various content types.
 
 ---
 
@@ -9,16 +9,17 @@ This is the default Typst template - a general-purpose document suitable for var
 | File | Purpose |
 |------|---------|
 | `main.typ` | **EDIT THIS** - Your document content |
-| `demo.typ` | Reference - Comprehensive syntax examples |
-| `assets/` | Store images here (PNG, JPG, SVG, WebP) |
-
-**Full Syntax Guide**: See [SYNTAX.md](../../../SYNTAX.md) at project root.
+| `demo.typ` | Reference - Syntax examples |
+| `assets/` | Store images here |
 
 ---
 
-## Quick Start
+## Template Settings
 
-Edit `main.typ` to create your document. Current template uses:
+This template uses:
+- A4 paper with 2cm margins
+- Linux Libertine font (academic serif)
+- 11pt font size
 
 ```typst
 #set page(paper: "a4", margin: 2cm)
@@ -27,145 +28,33 @@ Edit `main.typ` to create your document. Current template uses:
 
 ---
 
-## Quick Syntax Reference
-
-| Task | Syntax |
-|------|--------|
-| Bold | `*text*` |
-| Italic | `_text_` |
-| Heading | `= Title` (more `=` for subheadings) |
-| Bullet list | `- item` |
-| Numbered list | `+ item` |
-| Link | `#link("url")[text]` |
-| Image | `#image("/assets/image.png")` |
-| Inline math | `$x^2$` |
-| Block math | `$ x^2 $` |
-| Table | `#table(columns: 3, [...])` |
-
-For complete syntax, see `demo.typ` or [SYNTAX.md](../../../SYNTAX.md).
-
----
-
-## Available Fonts
+## Content Structure
 
 ```typst
-#set text(font: "Noto Sans")        // Clean sans-serif
-#set text(font: "Noto Serif")       // Classic serif
-#set text(font: "Linux Libertine")  // Academic serif
-#set text(font: "Inter")            // Modern UI
-#set text(font: "Fira Code")        // Monospace/code
-#set text(font: "Noto Sans SC")     // Chinese
-```
+= Main Heading
+== Subheading
 
----
+*bold* and _italic_
 
-## Using Images
+- Bullet list
++ Numbered list
 
-1. Place images in `assets/` folder
-2. Use absolute paths starting with `/`:
-
-```typst
-#image("/assets/logo.png", width: 50%)
-
-#figure(
-  image("/assets/diagram.png", width: 80%),
-  caption: [Description here],
-)
-```
-
----
-
-## Common Patterns
-
-### Callout Box
-
-```typst
-#rect(
-  width: 100%,
-  fill: blue.lighten(90%),
-  stroke: 1pt + blue,
-  radius: 4pt,
-  inset: 10pt,
-)[
-  *Note:* Important information here.
-]
-```
-
-### Two-Column Layout
-
-```typst
-#grid(
-  columns: (1fr, 1fr),
-  gutter: 1em,
-  [Left content],
-  [Right content],
-)
-```
-
-### Centered Title
-
-```typst
-#align(center)[
-  #text(size: 24pt, weight: "bold")[Document Title]
-  #v(0.5em)
-  Author Name
-]
+$ x^2 + y^2 = z^2 $  // Math
 ```
 
 ---
 
 ## Goals for AI
 
-When editing this template:
-
-1. **Modify only `main.typ`** - This is your working document
-2. **Reference `demo.typ`** - See examples of any syntax you need
-3. **Use absolute paths** - Always start image/import paths with `/`
-4. **Keep styling consistent** - Match the existing page/text settings
-5. **Add images to `assets/`** - All images go in the assets folder
-
-### What to Edit
-- Document content in `main.typ`
-- Add new `.typ` files for reusable components
-
-### What NOT to Edit
-- `demo.typ` (reference only)
-- Files outside `public/template/`
+1. **Edit only `main.typ`** - Your working document
+2. **Reference `demo.typ`** - See syntax examples
+3. **Use absolute paths** - Start with `/` for images/imports
+4. **Keep styling consistent** - Match page/text settings
 
 ---
 
-## Template Customization
+## Resources
 
-To change the document style, modify the `#set` rules at the top of `main.typ`:
-
-```typst
-// Page settings
-#set page(
-  paper: "a4",           // or "us-letter"
-  margin: 2cm,           // or (x: 2cm, y: 2.5cm)
-  numbering: "1",        // page numbers
-)
-
-// Text settings
-#set text(
-  font: "Noto Sans",
-  size: 11pt,
-)
-
-// Paragraph settings
-#set par(
-  justify: true,
-  leading: 0.65em,
-)
-
-// Heading numbering
-#set heading(numbering: "1.1")
-```
-
----
-
-## Need Help?
-
-1. Check `demo.typ` for working examples
-2. See [SYNTAX.md](../../../SYNTAX.md) for complete syntax reference
-3. Visit https://typst.app/docs for official documentation
+- `demo.typ` - Working examples
+- `SYNTAX.md` (project root) - Full syntax guide
+- https://typst.app/docs - Official documentation
